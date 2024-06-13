@@ -1,108 +1,114 @@
+let btnLocation = document.getElementById("open_cart_btn");
 
-let btnLocation = document.getElementById('open_cart_btn');
-
-function formatterCart (priceSum) {
+function formatterCart(priceSum) {
     let price = priceSum.toString();
-    let formattedPrice = '';
+    let formattedPrice = "";
     for (let i = 0; i < price.length; i++) {
         if (i > 0 && i % 3 === 0) {
-            formattedPrice = ' ' + formattedPrice;
+            formattedPrice = " " + formattedPrice;
         }
         formattedPrice = price[price.length - 1 - i] + formattedPrice;
     }
     return formattedPrice;
-};
+}
 
-btnLocation.addEventListener('click', function () {
+function updateCartIcon() {
+    const cartIconNumber = document.querySelector(".open_cart_number");
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartIconNumber.textContent = totalItems;
+}
 
-    const divElement = document.createElement('div');
+btnLocation.addEventListener("click", function () {
+    const divElement = document.createElement("div");
+    divElement.classList.add("jqcart_layout");
 
-    divElement.classList.add('jqcart_layout');
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    divElement.innerHTML = `
-        <div class="jqcart_content">
-            <div class="jqcart_table_wrapper">
-                <div class="jqcart_manage_order">
-                
-                    <ul class="jqcart_thead">
-                        <li></li>
-                        <li>ТОВАР</li>
-                        <li></li>
-                        <li>ЦЕНА</li>
-                        <li>КОЛИЧЕСТВО </li>
-                        <li>СТОИМОСТЬ</li>
-                    </ul>
-                    
-                    <ul class="jqcart_tbody" data-id="4561">
-                        <li class="jqcart_small_td">
-                            <img src="images/stul_kresla/GloryDC.png" alt="Img">
-                        </li>
-                        <li>
-                            <div class="jqcart_nd">
-                                <a href="#chair.html">Slim DC</a>
-                            </div>
-                        </li>
-                        <li></li>
-                        <li class="jqcart_price">83 000</li>
-                        <li>
-                            <div class="jqcart_pm">
-                                <input type="text" class="jqcart_amount" value="2">
-                                <span class="jqcart_incr" data-incr="1">
-                                    <i class="fa fa-angle-up" aria-hidden="true"></i>
-                                </span>
-                                <span class="jqcart_incr" data-incr="-1">
-                                    <i class="fa fa-angle-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </li>
-                        <li class="jqcart_sum">166 000 тг</li>
-                    </ul>
-                    
-                    <ul class="jqcart_tbody" data-id="6203">
-                        <li class="jqcart_small_td">
-                            <img src="images/stul_kresla/Hi-tech.png" alt="Img">
-                        </li>
-                        <li>
-                            <div class="jqcart_nd">
-                                <a href="#chair.html">Hi-tech</a>
-                            </div>
-                        </li>
-                        <li></li>
-                        <li class="jqcart_price">95 500</li>
-                        <li>
-                            <div class="jqcart_pm">
-                                <input type="text" class="jqcart_amount" value="1">
-                                <span class="jqcart_incr" data-incr="1">
-                                    <i class="fa fa-angle-up" aria-hidden="true"></i>
-                                </span>
-                                <span class="jqcart_incr" data-incr="-1">
-                                    <i class="fa fa-angle-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                        </li>
-                        <li class="jqcart_sum">95 500 тг</li>
-                    </ul>
-                    
+    function renderCart() {
+        let cartContent = cart
+            .map(
+                (item) => `
+            <ul class="jqcart_tbody" data-id="${item.code}">
+                <li class="jqcart_small_td">
+                    <img src="${item.img}" alt="Img">
+                </li>
+                <li>
+                    <div class="jqcart_nd">
+                        <a href="${item.link}">${item.title}</a>
+                    </div>
+                </li>
+                <li class="jqcart_price">${formatterCart(item.price)}</li>
+                <li>
+                    <div class="jqcart_pm">
+                        <input type="text" class="jqcart_amount" value="${item.quantity}">
+                        <span class="jqcart_incr" data-incr="1">
+                            <i class="fa fa-angle-up" aria-hidden="true"></i>
+                        </span>
+                        <span class="jqcart_incr" data-incr="-1">
+                            <i class="fa fa-angle-down" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </li>
+                <li class="jqcart_sum">${formatterCart(item.price * item.quantity)} тг</li>
+            </ul>
+        `
+            )
+            .join("");
+
+        const totalPrice = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+
+        divElement.innerHTML = `
+            <div class="jqcart_content">
+                <div class="jqcart_table_wrapper">
+                    <div class="jqcart_manage_order">
+                        <ul class="jqcart_thead">
+                            <li></li>
+                            <li>ТОВАР</li>
+                            <li>ЦЕНА</li>
+                            <li>КОЛИЧЕСТВО </li>
+                            <li>СТОИМОСТЬ</li>
+                        </ul>
+                        ${cartContent}
+                    </div>
+                </div>
+                <div class="jqcart_manage_block">
+                    <div class="jqcart_btn">
+                        <button class="jqcart_open_form_btn">Оформить заказ</button>
+                        <form class="jqcart_order_form" style="opacity: 0">
+                            <input class="jqcart_return_btn" type="reset" value="Продолжить покупки">
+                        </form>
+                    </div>
+                    <div class="jqcart_subtotal">Итого: <strong>${formatterCart(totalPrice)}</strong> тг</div>
                 </div>
             </div>
-            
-            <div class="jqcart_manage_block">
-                <div class="jqcart_btn">
-                    <button class="jqcart_open_form_btn">Оформить заказ</button>
-                    <form class="jqcart_order_form" style="opacity: 0">
-                        <input class="jqcart_return_btn" type="reset" value="Продолжить покупки">
-                    </form>
-                </div>
-                <div class="jqcart_subtotal">Итого: <strong>261 500</strong> тг</div>
-            </div>
-            
-        </div>
-    `;
+        `;
 
-    document.body.appendChild(divElement);
+        document.body.appendChild(divElement);
 
-    document.querySelector('.jqcart_layout').addEventListener('click', function () {
-        document.querySelector('.jqcart_layout').remove();
-    });
+        document.querySelector(".jqcart_layout").addEventListener("click", function (event) {
+            if (event.target.classList.contains("jqcart_layout")) {
+                document.querySelector(".jqcart_layout").remove();
+            }
+        });
 
+        document.querySelectorAll(".jqcart_incr").forEach((button) => {
+            button.addEventListener("click", function () {
+                const code = this.closest(".jqcart_tbody").getAttribute("data-id");
+                const incr = parseInt(this.getAttribute("data-incr"));
+                const item = cart.find((cartItem) => cartItem.code === code);
+                if (item) {
+                    item.quantity += incr;
+                    if (item.quantity <= 0) {
+                        cart = cart.filter((cartItem) => cartItem.code !== code);
+                    }
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    renderCart();
+                    updateCartIcon();
+                }
+            });
+        });
+    }
+
+    renderCart();
 });
